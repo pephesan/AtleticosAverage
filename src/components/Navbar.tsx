@@ -11,6 +11,7 @@ const navigation = [
   { name: 'Jugadores', href: '/players' },
   { name: 'Juegos', href: '/games' },
   { name: 'Estadísticas', href: '/stats' },
+  { name: 'Admin', href: '/admin' }, // ← NUEVA LÍNEA
 ];
 
 export function Navbar() {
@@ -31,7 +32,7 @@ export function Navbar() {
           {/* Navigation Links */}
           <div className="flex items-center space-x-1">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
               return (
                 <Link
                   key={item.name}
