@@ -1,44 +1,26 @@
 // src/app/players/[id]/page.tsx
-'use client';
-
-import { use } from 'react';
-import { mockPlayers, mockPlayerStats, mockGames } from '../../../data/mockData';
+import { getPlayerById, getPlayerStatsById, getGames } from '@/lib/supabase-queries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { PlayerStatsChart } from '@/components/PlayerStatsChart';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { notFound } from 'next/navigation';
 
-export default function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export const dynamic = 'force-dynamic';
+
+export default async function PlayerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const playerId = parseInt(id);
   
-  const player = mockPlayers.find((p) => p.id === playerId);
-  const stats = mockPlayerStats.find((s) => s.playerId === playerId);
+  const player = await getPlayerById(playerId);
+  const stats = await getPlayerStatsById(playerId);
+  const games = await getGames();
 
   if (!player || !stats) {
-    return (
-      <div className="container mx-auto p-6 text-center">
-        <h1 className="text-2xl font-bold">Jugador no encontrado</h1>
-        <Link href="/players">
-          <Button className="mt-4">Volver a Jugadores</Button>
-        </Link>
-      </div>
-    );
+    notFound();
   }
-
-  // Datos para gráfica individual
-  const playerChartData = [
-    { stat: 'H', value: stats.hits },
-    { stat: '2B', value: stats.doubles },
-    { stat: '3B', value: stats.triples },
-    { stat: 'HR', value: stats.homeRuns },
-    { stat: 'RBI', value: stats.rbi },
-    { stat: 'BB', value: stats.walks },
-    { stat: 'SO', value: stats.strikeouts },
-    { stat: 'SB', value: stats.stolenBases },
-  ];
 
   return (
     <div className="container mx-auto p-6 space-y-8">
@@ -71,14 +53,14 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
           <CardHeader className="pb-2">
             <CardDescription>Batting AVG</CardDescription>
             <CardTitle className="text-3xl">
-              .{(stats.battingAverage * 1000).toFixed(0)}
+              .{(stats.batting_average * 1000).toFixed(0)}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Home Runs</CardDescription>
-            <CardTitle className="text-3xl">{stats.homeRuns}</CardTitle>
+            <CardTitle className="text-3xl">{stats.home_runs}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -96,7 +78,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Games</CardDescription>
-            <CardTitle className="text-3xl">{stats.gamesPlayed}</CardTitle>
+            <CardTitle className="text-3xl">{stats.games_played}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -121,11 +103,11 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Juegos Jugados:</span>
-                    <span className="font-semibold">{stats.gamesPlayed}</span>
+                    <span className="font-semibold">{stats.games_played}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Turnos al Bate:</span>
-                    <span className="font-semibold">{stats.atBats}</span>
+                    <span className="font-semibold">{stats.at_bats}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Hits:</span>
@@ -141,7 +123,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Home Runs:</span>
-                    <span className="font-semibold">{stats.homeRuns}</span>
+                    <span className="font-semibold">{stats.home_runs}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">RBI:</span>
@@ -160,15 +142,15 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Batting Average:</span>
-                    <span className="font-semibold">.{(stats.battingAverage * 1000).toFixed(0)}</span>
+                    <span className="font-semibold">.{(stats.batting_average * 1000).toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">On-Base %:</span>
-                    <span className="font-semibold">.{(stats.onBasePercentage * 1000).toFixed(0)}</span>
+                    <span className="font-semibold">.{(stats.on_base_percentage * 1000).toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Slugging %:</span>
-                    <span className="font-semibold">.{(stats.sluggingPercentage * 1000).toFixed(0)}</span>
+                    <span className="font-semibold">.{(stats.slugging_percentage * 1000).toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Bases por Bolas:</span>
@@ -180,7 +162,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Bases Robadas:</span>
-                    <span className="font-semibold">{stats.stolenBases}</span>
+                    <span className="font-semibold">{stats.stolen_bases}</span>
                   </div>
                 </div>
               </CardContent>
@@ -190,23 +172,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
 
         {/* Tab 2: Gráficas */}
         <TabsContent value="charts" className="space-y-6 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Distribución de Estadísticas</CardTitle>
-              <CardDescription>Análisis visual del rendimiento</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <BarChart data={playerChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="stat" />
-                  <YAxis />
-                  <Tooltip />
-                  <Bar dataKey="value" fill="#3b82f6" />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <PlayerStatsChart stats={stats} />
         </TabsContent>
 
         {/* Tab 3: Historial */}
@@ -218,7 +184,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {mockGames.slice(0, 5).map((game) => (
+                {games.slice(0, 5).map((game) => (
                   <div key={game.id} className="flex items-center justify-between p-3 rounded-lg border">
                     <div>
                       <p className="font-semibold">{game.opponent}</p>
@@ -226,7 +192,7 @@ export default function PlayerDetailPage({ params }: { params: Promise<{ id: str
                     </div>
                     <div className="flex items-center gap-4">
                       <span className="text-lg font-bold">
-                        {game.scoreUs} - {game.scoreThem}
+                        {game.score_us} - {game.score_them}
                       </span>
                       <Badge variant={game.result === 'W' ? 'default' : 'destructive'}>
                         {game.result}

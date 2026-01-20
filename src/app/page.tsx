@@ -1,9 +1,23 @@
 // src/app/page.tsx
-import { mockPlayers, mockPlayerStats, mockTeamStats } from '../data/mockData';
+import { getPlayers, getPlayerStats, getTeamStats } from '@/lib/supabase-queries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FadeIn, FadeInStagger, FadeInStaggerItem } from '@/components/FadeIn';
 
-export default function Home() {
+export const dynamic = 'force-dynamic';
+
+export default async function Home() {
+  const players = await getPlayers();
+  const playerStats = await getPlayerStats();
+  const teamStats = await getTeamStats();
+
+  if (!teamStats) {
+    return (
+      <div className="container mx-auto p-6">
+        <p>Error cargando datos del equipo</p>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
@@ -12,7 +26,7 @@ export default function Home() {
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-slate-600 text-lg">
+          <p className="text-slate-600 dark:text-slate-400 text-lg">
             Resumen general del equipo
           </p>
         </div>
@@ -25,7 +39,7 @@ export default function Home() {
             <CardHeader className="pb-3">
               <CardDescription>Récord</CardDescription>
               <CardTitle className="text-3xl">
-                {mockTeamStats.wins}-{mockTeamStats.losses}
+                {teamStats.wins}-{teamStats.losses}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -36,7 +50,7 @@ export default function Home() {
             <CardHeader className="pb-3">
               <CardDescription>Promedio del Equipo</CardDescription>
               <CardTitle className="text-3xl">
-                .{(mockTeamStats.teamBattingAverage * 1000).toFixed(0)}
+                .{(teamStats.team_batting_average * 1000).toFixed(0)}
               </CardTitle>
             </CardHeader>
           </Card>
@@ -46,7 +60,7 @@ export default function Home() {
           <Card>
             <CardHeader className="pb-3">
               <CardDescription>Carreras Totales</CardDescription>
-              <CardTitle className="text-3xl">{mockTeamStats.totalRuns}</CardTitle>
+              <CardTitle className="text-3xl">{teamStats.total_runs}</CardTitle>
             </CardHeader>
           </Card>
         </FadeInStaggerItem>
@@ -55,7 +69,7 @@ export default function Home() {
           <Card>
             <CardHeader className="pb-3">
               <CardDescription>Hits Totales</CardDescription>
-              <CardTitle className="text-3xl">{mockTeamStats.totalHits}</CardTitle>
+              <CardTitle className="text-3xl">{teamStats.total_hits}</CardTitle>
             </CardHeader>
           </Card>
         </FadeInStaggerItem>
@@ -70,8 +84,8 @@ export default function Home() {
           </CardHeader>
           <CardContent>
             <FadeInStagger className="space-y-4">
-              {mockPlayers.map((player) => {
-                const stats = mockPlayerStats.find((s) => s.playerId === player.id);
+              {players.map((player) => {
+                const stats = playerStats.find((s) => s.player_id === player.id);
                 return (
                   <FadeInStaggerItem key={player.id}>
                     <div className="flex items-center justify-between p-4 rounded-lg border bg-card hover:bg-accent transition-colors cursor-pointer hover:scale-[1.02] transition-transform">
@@ -87,11 +101,11 @@ export default function Home() {
                       <div className="flex gap-6 items-center">
                         <div className="text-center">
                           <p className="text-xs text-muted-foreground">AVG</p>
-                          <p className="text-lg font-bold">.{((stats?.battingAverage || 0) * 1000).toFixed(0)}</p>
+                          <p className="text-lg font-bold">.{((stats?.batting_average || 0) * 1000).toFixed(0)}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-xs text-muted-foreground">HR</p>
-                          <p className="text-lg font-bold">{stats?.homeRuns || 0}</p>
+                          <p className="text-lg font-bold">{stats?.home_runs || 0}</p>
                         </div>
                         <div className="text-center">
                           <p className="text-xs text-muted-foreground">RBI</p>

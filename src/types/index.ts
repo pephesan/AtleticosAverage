@@ -1,45 +1,50 @@
-// src/types/index.ts
-
-export interface Player {
+// Tipos de Supabase (agregar al final del archivo)
+export interface PlayerDB {
   id: number;
   name: string;
   number: number;
   position: string;
-  image?: string;
+  image: string | null;
+  created_at: string;
 }
 
-export interface PlayerStats {
-  playerId: number;
-  gamesPlayed: number;
-  atBats: number;
+export interface PlayerStatsDB {
+  id: number;
+  player_id: number;
+  games_played: number;
+  at_bats: number;
   hits: number;
   doubles: number;
   triples: number;
-  homeRuns: number;
+  home_runs: number;
   rbi: number;
   walks: number;
   strikeouts: number;
-  stolenBases: number;
-  battingAverage: number;
-  onBasePercentage: number;
-  sluggingPercentage: number;
+  stolen_bases: number;
+  batting_average: number;
+  on_base_percentage: number;
+  slugging_percentage: number;
+  updated_at: string;
 }
 
-export interface Game {
+export interface GameDB {
   id: number;
   date: string;
   opponent: string;
   location: 'home' | 'away';
-  scoreUs: number;
-  scoreThem: number;
-  result: 'W' | 'L' | 'T';
+  score_us: number;
+  score_them: number;
+  result: 'W' | 'L' | 'T' | null;
+  created_at: string;
 }
 
-export interface TeamStats {
+export interface TeamStatsDB {
+  id: number;
   wins: number;
   losses: number;
   ties: number;
-  totalRuns: number;
-  totalHits: number;
-  teamBattingAverage: number;
+  total_runs: number;
+  total_hits: number;
+  team_batting_average: number;
+  updated_at: string;
 }
