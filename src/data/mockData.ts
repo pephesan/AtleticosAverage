@@ -98,6 +98,15 @@ export const mockGames: Game[] = [
   { id: 3, date: '2026-01-12', opponent: 'Leones', location: 'home', scoreUs: 6, scoreThem: 4, result: 'W' },
   { id: 4, date: '2026-01-15', opponent: 'Tigres', location: 'away', scoreUs: 2, scoreThem: 9, result: 'L' },
   { id: 5, date: '2026-01-18', opponent: 'Diablos', location: 'home', scoreUs: 10, scoreThem: 3, result: 'W' },
+  { id: 6, date: '2026-01-22', opponent: 'Sultanes', location: 'home', scoreUs: 5, scoreThem: 5, result: 'T' },
+  { id: 7, date: '2026-01-25', opponent: 'Toros', location: 'away', scoreUs: 7, scoreThem: 4, result: 'W' },
+  { id: 8, date: '2026-01-29', opponent: 'Charros', location: 'home', scoreUs: 4, scoreThem: 6, result: 'L' },
+  { id: 9, date: '2026-02-01', opponent: 'Leones', location: 'away', scoreUs: 9, scoreThem: 2, result: 'W' },
+  { id: 10, date: '2026-02-05', opponent: 'Águilas', location: 'home', scoreUs: 11, scoreThem: 8, result: 'W' },
+  // Próximos juegos (sin resultado aún)
+  { id: 11, date: '2026-01-28', opponent: 'Sultanes', location: 'away', scoreUs: 0, scoreThem: 0, result: 'W' },
+  { id: 12, date: '2026-02-02', opponent: 'Tigres', location: 'home', scoreUs: 0, scoreThem: 0, result: 'W' },
+  { id: 13, date: '2026-02-06', opponent: 'Diablos', location: 'away', scoreUs: 0, scoreThem: 0, result: 'W' },
 ];
 
 export const mockTeamStats: TeamStats = {
