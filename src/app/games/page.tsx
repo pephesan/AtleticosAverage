@@ -1,26 +1,32 @@
 // src/app/games/page.tsx
-'use client';
-
-import { mockGames, mockTeamStats } from '../../data/mockData';
+import { getGames, getTeamStats } from '@/lib/supabase-queries';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar } from '@/components/ui/calendar';
-import { useState } from 'react';
+import { GamesCalendar } from '@/components/GamesCalendar';
 
-export default function GamesPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+export const dynamic = 'force-dynamic';
+
+export default async function GamesPage() {
+  const allGames = await getGames();
+  const teamStats = await getTeamStats();
 
   // Separar juegos pasados y próximos
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const pastGames = mockGames
-    .filter((game) => new Date(game.date) < today && game.scoreUs > 0)
+  const pastGames = allGames
+    .filter((game) => {
+      const gameDate = new Date(game.date);
+      return gameDate < today && game.score_us > 0;
+    })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const upcomingGames = mockGames
-    .filter((game) => new Date(game.date) >= today || game.scoreUs === 0)
+  const upcomingGames = allGames
+    .filter((game) => {
+      const gameDate = new Date(game.date);
+      return gameDate >= today || game.score_us === 0;
+    })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Función para formatear fecha
@@ -34,6 +40,10 @@ export default function GamesPage() {
     });
   };
 
+  if (!teamStats) {
+    return <div>Error cargando datos</div>;
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-8">
       {/* Header */}
@@ -41,7 +51,7 @@ export default function GamesPage() {
         <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
           📅 Juegos
         </h1>
-        <p className="text-slate-600 text-lg">
+        <p className="text-slate-600 dark:text-slate-400 text-lg">
           Calendario y resultados de la temporada
         </p>
       </div>
@@ -52,7 +62,7 @@ export default function GamesPage() {
           <CardHeader className="pb-3">
             <CardDescription>Récord General</CardDescription>
             <CardTitle className="text-3xl">
-              {mockTeamStats.wins}W - {mockTeamStats.losses}L
+              {teamStats.wins}W - {teamStats.losses}L
             </CardTitle>
           </CardHeader>
         </Card>
@@ -61,7 +71,7 @@ export default function GamesPage() {
           <CardHeader className="pb-3">
             <CardDescription>Porcentaje</CardDescription>
             <CardTitle className="text-3xl">
-              {((mockTeamStats.wins / (mockTeamStats.wins + mockTeamStats.losses)) * 100).toFixed(1)}%
+              {((teamStats.wins / (teamStats.wins + teamStats.losses)) * 100).toFixed(1)}%
             </CardTitle>
           </CardHeader>
         </Card>
@@ -111,7 +121,7 @@ export default function GamesPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold">
-                        {game.scoreUs} - {game.scoreThem}
+                        {game.score_us} - {game.score_them}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {game.result === 'W' ? 'Victoria' : game.result === 'L' ? 'Derrota' : 'Empate'}
@@ -133,27 +143,33 @@ export default function GamesPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {upcomingGames.map((game) => (
-                  <div
-                    key={game.id}
-                    className="flex items-center justify-between p-4 rounded-lg border bg-blue-50/50 hover:bg-blue-100/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-                        <span className="text-white font-bold">VS</span>
+                {upcomingGames.length > 0 ? (
+                  upcomingGames.map((game) => (
+                    <div
+                      key={game.id}
+                      className="flex items-center justify-between p-4 rounded-lg border bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                          <span className="text-white font-bold">VS</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-lg">{game.opponent}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {formatDate(game.date)} • {game.location === 'home' ? '🏠 Local' : '✈️ Visitante'}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-lg">{game.opponent}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {formatDate(game.date)} • {game.location === 'home' ? '🏠 Local' : '✈️ Visitante'}
-                        </p>
+                      <div className="text-right">
+                        <Badge variant="outline">Programado</Badge>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant="outline">Programado</Badge>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-8">
+                    No hay juegos programados
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -161,86 +177,7 @@ export default function GamesPage() {
 
         {/* Tab 3: Calendario */}
         <TabsContent value="calendar" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Calendar */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Calendario de Juegos</CardTitle>
-                <CardDescription>Selecciona una fecha para ver juegos</CardDescription>
-              </CardHeader>
-              <CardContent className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={setDate}
-                  className="rounded-md border"
-                />
-              </CardContent>
-            </Card>
-
-            {/* Game Stats Summary */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Resumen por Ubicación</CardTitle>
-                <CardDescription>Rendimiento local vs visitante</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Home Games */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">🏠 Juegos Locales</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-3 rounded-lg bg-green-100">
-                      <p className="text-2xl font-bold text-green-700">
-                        {pastGames.filter(g => g.location === 'home' && g.result === 'W').length}
-                      </p>
-                      <p className="text-xs text-green-600">Victorias</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-red-100">
-                      <p className="text-2xl font-bold text-red-700">
-                        {pastGames.filter(g => g.location === 'home' && g.result === 'L').length}
-                      </p>
-                      <p className="text-xs text-red-600">Derrotas</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-gray-100">
-                      <p className="text-2xl font-bold text-gray-700">
-                        {pastGames.filter(g => g.location === 'home' && g.result === 'T').length}
-                      </p>
-                      <p className="text-xs text-gray-600">Empates</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Away Games */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">✈️ Juegos de Visitante</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="p-3 rounded-lg bg-green-100">
-                      <p className="text-2xl font-bold text-green-700">
-                        {pastGames.filter(g => g.location === 'away' && g.result === 'W').length}
-                      </p>
-                      <p className="text-xs text-green-600">Victorias</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-red-100">
-                      <p className="text-2xl font-bold text-red-700">
-                        {pastGames.filter(g => g.location === 'away' && g.result === 'L').length}
-                      </p>
-                      <p className="text-xs text-red-600">Derrotas</p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-gray-100">
-                      <p className="text-2xl font-bold text-gray-700">
-                        {pastGames.filter(g => g.location === 'away' && g.result === 'T').length}
-                      </p>
-                      <p className="text-xs text-gray-600">Empates</p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <GamesCalendar pastGames={pastGames} />
         </TabsContent>
       </Tabs>
     </div>
