@@ -4,6 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from './ThemeToggle';
 
 const navigation = [
   { name: 'Dashboard', href: '/' },
@@ -16,7 +17,7 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 sticky top-0 z-50">
+    <nav className="border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/95 dark:supports-[backdrop-filter]:bg-slate-950/60 sticky top-0 z-50">
       <div className="container mx-auto px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -38,14 +39,17 @@ export function Navbar() {
                   className={cn(
                     'px-4 py-2 rounded-md text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-100'
+                      : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-800 dark:hover:text-gray-100'
                   )}
                 >
                   {item.name}
                 </Link>
               );
             })}
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
         </div>
       </div>
