@@ -1,7 +1,7 @@
 // src/data/mockData.ts
-import { Player, PlayerStats, Game, TeamStats } from '@/types';
+import { PlayerDB, PlayerStatsDB, GameDB, TeamStatsDB } from '@/types';
 
-export const mockPlayers: Player[] = [
+export const mockPlayers: PlayerDB[] = [
   { id: 1, name: 'Juan Pérez', number: 10, position: 'CF' },
   { id: 2, name: 'Carlos López', number: 5, position: 'SS' },
   { id: 3, name: 'Miguel Sánchez', number: 23, position: '1B' },
@@ -9,7 +9,7 @@ export const mockPlayers: Player[] = [
   { id: 5, name: 'Luis Martínez', number: 15, position: 'LF' },
 ];
 
-export const mockPlayerStats: PlayerStats[] = [
+export const mockPlayerStats: PlayerStatsDB[] = [
   {
     playerId: 1,
     gamesPlayed: 25,
@@ -92,7 +92,7 @@ export const mockPlayerStats: PlayerStats[] = [
   },
 ];
 
-export const mockGames: Game[] = [
+export const mockGames: GameDB[] = [
   { id: 1, date: '2026-01-05', opponent: 'Toros', location: 'home', scoreUs: 8, scoreThem: 5, result: 'W' },
   { id: 2, date: '2026-01-08', opponent: 'Águilas', location: 'away', scoreUs: 3, scoreThem: 7, result: 'L' },
   { id: 3, date: '2026-01-12', opponent: 'Leones', location: 'home', scoreUs: 6, scoreThem: 4, result: 'W' },
@@ -104,15 +104,15 @@ export const mockGames: Game[] = [
   { id: 9, date: '2026-02-01', opponent: 'Leones', location: 'away', scoreUs: 9, scoreThem: 2, result: 'W' },
   { id: 10, date: '2026-02-05', opponent: 'Águilas', location: 'home', scoreUs: 11, scoreThem: 8, result: 'W' },
   // Próximos juegos (sin resultado aún)
-  { id: 11, date: '2026-01-28', opponent: 'Sultanes', location: 'away', scoreUs: 0, scoreThem: 0, result: 'W' },
-  { id: 12, date: '2026-02-02', opponent: 'Tigres', location: 'home', scoreUs: 0, scoreThem: 0, result: 'W' },
-  { id: 13, date: '2026-02-06', opponent: 'Diablos', location: 'away', scoreUs: 0, scoreThem: 0, result: 'W' },
+  { id: 11, date: '2026-02-08', opponent: 'Sultanes', location: 'away', scoreUs: null, scoreThem: null, result: null },
+  { id: 12, date: '2026-02-12', opponent: 'Tigres', location: 'home', scoreUs: null, scoreThem: null, result: null },
+  { id: 13, date: '2026-02-15', opponent: 'Diablos', location: 'away', scoreUs: null, scoreThem: null, result: null },
 ];
 
-export const mockTeamStats: TeamStats = {
+export const mockTeamStats: TeamStatsDB = {
   wins: 15,
   losses: 10,
-  ties: 0,
+  ties: 1,
   totalRuns: 142,
   totalHits: 218,
   teamBattingAverage: 0.298,
