@@ -11,8 +11,16 @@ import { CompleteConceptButton } from '@/components/finance/CompleteConceptButto
 
 export const dynamic = 'force-dynamic';
 
-export default async function ConceptoDetallePage({ params }: { params: { id: string } }) {
-  const conceptId = parseInt(params.id);
+// CAMBIO CRÍTICO: params es Promise<{ id: string }> en Next.js 15
+export default async function ConceptoDetallePage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  // AWAIT params antes de usarlo
+  const { id } = await params;
+  const conceptId = parseInt(id);
+  
   const concept = await getPaymentConceptById(conceptId);
 
   if (!concept) {
