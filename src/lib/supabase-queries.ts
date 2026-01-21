@@ -255,3 +255,190 @@ export async function deleteGame(id: number) {
   
   if (error) throw error;
 }
+
+// ========== FINANCE OPERATIONS ==========
+
+// ===== PAYMENT CONCEPTS =====
+export async function getPaymentConcepts() {
+  const { data, error } = await supabase
+    .from('payment_concepts')
+    .select('*')
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching payment concepts:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function getPaymentConceptById(id: number) {
+  const { data, error } = await supabase
+    .from('payment_concepts')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching payment concept:', error);
+    return null;
+  }
+  return data;
+}
+
+export async function addPaymentConcept(concept: {
+  name: string;
+  description?: string;
+  total_amount: number;
+  amount_per_player: number;
+  type: string;
+  due_date?: string;
+}) {
+  const { data, error } = await supabase
+    .from('payment_concepts')
+    .insert([concept])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function updatePaymentConcept(
+  id: number,
+  concept: {
+    name?: string;
+    description?: string;
+    total_amount?: number;
+    amount_per_player?: number;
+    status?: string;
+    due_date?: string;
+  }
+) {
+  const { data, error } = await supabase
+    .from('payment_concepts')
+    .update(concept)
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function deletePaymentConcept(id: number) {
+  const { error } = await supabase
+    .from('payment_concepts')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+}
+
+// ===== PAYMENTS =====
+export async function getPayments() {
+  const { data, error } = await supabase
+    .from('payments')
+    .select(`
+      *,
+      players!inner(name)
+    `)
+    .order('payment_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function getPaymentsByConceptId(conceptId: number) {
+  const { data, error } = await supabase
+    .from('payments')
+    .select(`
+      *,
+      players!inner(name)
+    `)
+    .eq('concept_id', conceptId)
+    .order('payment_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function getPaymentsByPlayerId(playerId: number) {
+  const { data, error } = await supabase
+    .from('payments')
+    .select(`
+      *,
+      payment_concepts!inner(name, amount_per_player)
+    `)
+    .eq('player_id', playerId)
+    .order('payment_date', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+  return data || [];
+}
+
+export async function addPayment(payment: {
+  player_id: number;
+  concept_id: number;
+  amount_paid: number;
+  payment_date: string;
+  payment_method: string;
+  notes?: string;
+}) {
+  const { data, error } = await supabase
+    .from('payments')
+    .insert([payment])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+}
+
+export async function deletePayment(id: number) {
+  const { error } = await supabase
+    .from('payments')
+    .delete()
+    .eq('id', id);
+  
+  if (error) throw error;
+}
+
+// ===== FINANCE STATS =====
+export async function getFinanceStats() {
+  // Obtener todos los conceptos activos
+  const { data: concepts } = await supabase
+    .from('payment_concepts')
+    .select('*')
+    .eq('status', 'active');
+
+  // Obtener todos los pagos
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('amount_paid');
+
+  // Obtener total de jugadores
+  const { data: players } = await supabase
+    .from('players')
+    .select('id');
+
+  const totalExpected = concepts?.reduce((sum, c) => sum + (c.total_amount || 0), 0) || 0;
+  const totalCollected = payments?.reduce((sum, p) => sum + (p.amount_paid || 0), 0) || 0;
+  const totalPlayers = players?.length || 0;
+
+  return {
+    totalExpected,
+    totalCollected,
+    totalPending: totalExpected - totalCollected,
+    totalPlayers,
+  };
+}
