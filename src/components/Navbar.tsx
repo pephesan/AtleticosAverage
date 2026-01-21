@@ -11,7 +11,8 @@ const navigation = [
   { name: 'Jugadores', href: '/players' },
   { name: 'Juegos', href: '/games' },
   { name: 'Estadísticas', href: '/stats' },
-  { name: 'Admin', href: '/admin' }, // ← NUEVA LÍNEA
+  { name: 'Finanzas', href: '/finanzas' },
+  { name: 'Admin', href: '/admin' },
 ];
 
 export function Navbar() {

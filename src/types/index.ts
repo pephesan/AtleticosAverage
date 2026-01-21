@@ -48,3 +48,39 @@ export interface TeamStatsDB {
   team_batting_average: number;
   updated_at: string;
 }
+
+// ========== FINANCE TYPES ==========
+
+export interface PaymentConceptDB {
+  id: number;
+  name: string;
+  description: string | null;
+  total_amount: number;
+  amount_per_player: number;
+  type: 'game' | 'uniform' | 'equipment' | 'tournament' | 'other';
+  status: 'active' | 'completed' | 'cancelled';
+  due_date: string | null;
+  created_at: string;
+}
+
+export interface PaymentDB {
+  id: number;
+  player_id: number;
+  concept_id: number;
+  amount_paid: number;
+  payment_date: string;
+  payment_method: 'efectivo' | 'transferencia' | 'otro';
+  notes: string | null;
+  created_at: string;
+}
+
+// Para joins con información relacionada
+export interface PaymentWithPlayer extends PaymentDB {
+  player_name?: string;
+}
+
+export interface PaymentConceptWithStats extends PaymentConceptDB {
+  total_paid: number;
+  players_paid: number;
+  total_players: number;
+}
