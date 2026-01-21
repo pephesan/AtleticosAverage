@@ -273,16 +273,28 @@ export async function getPaymentConcepts() {
 }
 
 export async function getPaymentConceptById(id: number) {
+  console.log('=== DEBUG getPaymentConceptById ===');
+  console.log('ID recibido:', id);
+  console.log('Tipo de ID:', typeof id);
+  
   const { data, error } = await supabase
     .from('payment_concepts')
     .select('*')
     .eq('id', id)
     .single();
   
+  console.log('Data:', data);
+  console.log('Error:', error);
+  console.log('Error stringified:', JSON.stringify(error, null, 2));
+  
   if (error) {
     console.error('Error fetching payment concept:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    console.error('Error details:', error.details);
     return null;
   }
+  
   return data;
 }
 
