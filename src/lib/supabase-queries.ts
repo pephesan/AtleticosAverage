@@ -74,18 +74,45 @@ export async function getGames() {
   return data || [];
 }
 
-// Obtener estadísticas del equipo
 export async function getTeamStats() {
-  const { data, error } = await supabase
-    .from('team_stats')
-    .select('*')
-    .single();
+  // Obtener todos los juegos
+  const { data: games, error: gamesError } = await supabase
+    .from('games')
+    .select('*');
   
-  if (error) {
-    console.error('Error fetching team stats:', error);
+  if (gamesError) {
+    console.error('Error fetching games:', gamesError);
     return null;
   }
-  return data;
+
+  // Calcular récord dinámicamente
+  const wins = games?.filter(g => g.result === 'W').length || 0;
+  const losses = games?.filter(g => g.result === 'L').length || 0;
+  const ties = games?.filter(g => g.result === 'T').length || 0;
+
+  // Obtener stats de jugadores para calcular totales
+  const { data: playerStats, error: statsError } = await supabase
+    .from('player_stats')
+    .select('*');
+  
+  if (statsError) {
+    console.error('Error fetching player stats:', statsError);
+  }
+
+  const totalRuns = playerStats?.reduce((sum, p) => sum + (p.rbi || 0), 0) || 0;
+  const totalHits = playerStats?.reduce((sum, p) => sum + (p.hits || 0), 0) || 0;
+  const avgBatting = playerStats && playerStats.length > 0
+    ? playerStats.reduce((sum, p) => sum + (p.batting_average || 0), 0) / playerStats.length
+    : 0;
+
+  return {
+    wins,
+    losses,
+    ties,
+    total_runs: totalRuns,
+    total_hits: totalHits,
+    team_batting_average: avgBatting
+  };
 }
 
 // ========== CRUD OPERATIONS ==========
