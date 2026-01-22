@@ -90,7 +90,7 @@ export default async function GamesPage() {
             </div>
           </div>
           <Button asChild size="lg" className="gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
-            <Link href="/games/new">
+            <Link href="/admin/games">
               <Plus className="w-4 h-4" />
               Agregar Juego
             </Link>
@@ -325,7 +325,7 @@ export default async function GamesPage() {
                       Agrega el próximo juego de la temporada
                     </p>
                     <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500">
-                      <Link href="/games/new">
+                      <Link href="/admin/games">
                         <Plus className="w-4 h-4 mr-2" />
                         Agregar Juego
                       </Link>
