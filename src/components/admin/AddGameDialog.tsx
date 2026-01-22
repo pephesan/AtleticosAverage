@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { addGame } from '@/lib/supabase-queries';
 import { useRouter } from 'next/navigation';
 import { Plus } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
 export function AddGameDialog() {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,11 @@ export function AddGameDialog() {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

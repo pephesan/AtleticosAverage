@@ -7,7 +7,8 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
-import { Home, Users, Calendar, TrendingUp, DollarSign, Settings, Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Home, Users, Calendar, TrendingUp, DollarSign, Settings, Menu, X, LogOut } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -24,6 +25,11 @@ export function Navbar() {
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAuthenticated');
+    window.location.href = '/';
+  };
 
   return (
     <nav className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 dark:bg-slate-950/80 dark:supports-[backdrop-filter]:bg-slate-950/80 sticky top-0 z-50 shadow-sm">
@@ -89,11 +95,34 @@ export function Navbar() {
             <div className="ml-2">
               <ThemeToggle />
             </div>
+
+            {/* Logout Button - Solo visible si estás en /admin */}
+            {pathname?.startsWith('/admin') && (
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="sm"
+                className="ml-2 gap-2 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+              >
+                <LogOut className="w-4 h-4" />
+                Salir
+              </Button>
+            )}
           </div>
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
             <ThemeToggle />
+            {pathname?.startsWith('/admin') && (
+              <Button
+                onClick={handleLogout}
+                variant="ghost"
+                size="icon"
+                className="text-red-600"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            )}
             <button
               onClick={toggleMobileMenu}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -133,6 +162,18 @@ export function Navbar() {
                   </Link>
                 );
               })}
+
+              {/* Logout Button Mobile */}
+              {pathname?.startsWith('/admin') && (
+                <Button
+                  onClick={handleLogout}
+                  variant="ghost"
+                  className="justify-start gap-3 px-4 py-3 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <LogOut className="w-5 h-5" />
+                  <span>Cerrar Sesión</span>
+                </Button>
+              )}
             </div>
           </div>
         )}

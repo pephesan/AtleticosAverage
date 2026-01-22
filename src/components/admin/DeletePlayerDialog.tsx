@@ -8,8 +8,10 @@ import { deletePlayer } from '@/lib/supabase-queries';
 import { useRouter } from 'next/navigation';
 import { Trash2 } from 'lucide-react';
 import { PlayerDB } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export function DeletePlayerDialog({ player }: { player: PlayerDB }) {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,6 +30,10 @@ export function DeletePlayerDialog({ player }: { player: PlayerDB }) {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

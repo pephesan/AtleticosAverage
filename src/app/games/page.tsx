@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
 import { Calendar, Trophy, TrendingUp, Target, Home, Plane, Plus } from 'lucide-react';
 import { GamesCalendar } from '@/components/GamesCalendar';
+import { AuthButton } from '@/components/AuthButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -89,12 +90,14 @@ export default async function GamesPage() {
               <p className="text-muted-foreground">Calendario y resultados de la temporada</p>
             </div>
           </div>
-          <Button asChild size="lg" className="gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
-            <Link href="/admin/games">
-              <Plus className="w-4 h-4" />
-              Agregar Juego
-            </Link>
-          </Button>
+          <AuthButton>
+            <Button asChild size="lg" className="gap-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">
+              <Link href="/admin/games">
+                <Plus className="w-4 h-4" />
+                Agregar Juego
+              </Link>
+            </Button>
+          </AuthButton>
         </div>
 
         {/* Stats Overview */}
@@ -324,12 +327,14 @@ export default async function GamesPage() {
                     <p className="text-muted-foreground mb-6">
                       Agrega el próximo juego de la temporada
                     </p>
-                    <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500">
-                      <Link href="/admin/games">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Agregar Juego
-                      </Link>
-                    </Button>
+                    <AuthButton>
+                      <Button asChild size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500">
+                        <Link href="/admin/games">
+                          <Plus className="w-4 h-4 mr-2" />
+                          Agregar Juego
+                        </Link>
+                      </Button>
+                    </AuthButton>
                   </CardContent>
                 </Card>
               )}
