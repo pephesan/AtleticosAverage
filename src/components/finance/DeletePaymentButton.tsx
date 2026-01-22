@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
 import { deletePayment } from '@/lib/supabase-queries';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DeletePaymentButtonProps {
   paymentId: number;
@@ -25,6 +26,7 @@ interface DeletePaymentButtonProps {
 }
 
 export function DeletePaymentButton({ paymentId, playerName, amount }: DeletePaymentButtonProps) {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -40,6 +42,10 @@ export function DeletePaymentButton({ paymentId, playerName, amount }: DeletePay
       setIsDeleting(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <AlertDialog>

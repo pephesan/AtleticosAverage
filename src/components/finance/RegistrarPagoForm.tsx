@@ -10,10 +10,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { addPayment, getPlayers, getPaymentConcepts } from '@/lib/supabase-queries';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/hooks/useAuth';
 
 export function RegistrarPagoForm() {
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const conceptoId = searchParams.get('concepto');
@@ -82,6 +84,60 @@ export function RegistrarPagoForm() {
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  // Mostrar loading mientras verifica autenticación
+  if (authLoading) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">Verificando acceso...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar mensaje si no está autenticado
+  if (!isAuthenticated) {
+    return (
+      <div className="container mx-auto p-6 max-w-2xl">
+        <Button variant="ghost" asChild className="mb-4">
+          <Link href="/finanzas">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Volver
+          </Link>
+        </Button>
+
+        <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl">
+          <CardContent className="py-16 text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-orange-500 to-red-500">
+                <Lock className="w-12 h-12 text-white" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold mb-2">Acceso Restringido</h3>
+            <p className="text-muted-foreground mb-6">
+              Necesitas iniciar sesión para registrar pagos
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Button asChild variant="outline">
+                <Link href="/finanzas">
+                  Volver a Finanzas
+                </Link>
+              </Button>
+              <Button asChild className="bg-gradient-to-r from-blue-500 to-cyan-500">
+                <Link href="/login">
+                  Iniciar Sesión
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto p-6 max-w-2xl">

@@ -11,8 +11,10 @@ import { updatePlayer } from '@/lib/supabase-queries';
 import { useRouter } from 'next/navigation';
 import { Edit } from 'lucide-react';
 import { PlayerDB } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export function EditPlayerDialog({ player }: { player: PlayerDB }) {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,6 +44,10 @@ export function EditPlayerDialog({ player }: { player: PlayerDB }) {
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -10,8 +10,10 @@ import { updatePlayerStats } from '@/lib/supabase-queries';
 import { useRouter } from 'next/navigation';
 import { Edit } from 'lucide-react';
 import { PlayerDB, PlayerStatsDB } from '@/types';
+import { useAuth } from '@/hooks/useAuth';
 
 export function EditStatsDialog({ player, stats }: { player: PlayerDB; stats: PlayerStatsDB }) {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -85,6 +87,10 @@ export function EditStatsDialog({ player, stats }: { player: PlayerDB; stats: Pl
       setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
