@@ -74,6 +74,20 @@ export async function getGames() {
   return data || [];
 }
 
+export async function getGameById(id: number) {
+  const { data, error } = await supabase
+    .from('games')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching game:', error);
+    return null;
+  }
+  return data;
+}
+
 export async function getTeamStats() {
   // Obtener todos los juegos
   const { data: games, error: gamesError } = await supabase
@@ -453,4 +467,124 @@ export async function getFinanceStats() {
     totalPending: totalExpected - totalCollected,
     totalPlayers,
   };
+}
+
+// ==========================================
+// SCORECARD QUERIES
+// ==========================================
+
+// Obtener lineup de un juego
+export async function getGameLineup(gameId: number) {
+  const { data, error } = await supabase
+    .from('game_lineups')
+    .select(`
+      *,
+      player:players(*)
+    `)
+    .eq('game_id', gameId)
+    .order('batting_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching game lineup:', error);
+    return [];
+  }
+  return data;
+}
+
+// Crear lineup para un juego
+export async function createGameLineup(lineup: { 
+  game_id: number; 
+  player_id: number; 
+  batting_order: number; 
+  position: string; 
+}[]) {
+  const { data, error } = await supabase
+    .from('game_lineups')
+    .insert(lineup)
+    .select();
+
+  if (error) {
+    console.error('Error creating game lineup:', error);
+    throw error;
+  }
+  return data;
+}
+
+// Obtener todos los turnos al bat de un juego
+export async function getAtBats(gameId: number) {
+  const { data, error } = await supabase
+    .from('at_bats')
+    .select(`
+      *,
+      player:players(*)
+    `)
+    .eq('game_id', gameId)
+    .order('inning', { ascending: true })
+    .order('batting_order', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching at bats:', error);
+    return [];
+  }
+  return data;
+}
+
+// Registrar un turno al bat
+export async function addAtBat(atBat: {
+  game_id: number;
+  player_id: number;
+  inning: number;
+  batting_order: number;
+  result_type: string;
+  runs_scored?: number;
+  rbis?: number;
+  stolen_base?: boolean;
+  notes?: string;
+}) {
+  const { data, error } = await supabase
+    .from('at_bats')
+    .insert(atBat)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding at bat:', error);
+    throw error;
+  }
+  return data;
+}
+
+// Eliminar un turno al bat
+export async function deleteAtBat(id: number) {
+  const { error } = await supabase
+    .from('at_bats')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting at bat:', error);
+    throw error;
+  }
+}
+
+// Actualizar un turno al bat
+export async function updateAtBat(id: number, updates: {
+  result_type?: string;
+  runs_scored?: number;
+  rbis?: number;
+  stolen_base?: boolean;
+  notes?: string;
+}) {
+  const { data, error } = await supabase
+    .from('at_bats')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating at bat:', error);
+    throw error;
+  }
+  return data;
 }
