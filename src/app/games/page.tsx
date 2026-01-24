@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { Calendar, Trophy, TrendingUp, Target, Home, Plane, Plus } from 'lucide-react';
 import { GamesCalendar } from '@/components/GamesCalendar';
 import { AuthButton } from '@/components/AuthButton';
+import { ScorecardButton } from '@/components/ScorecardButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -248,6 +249,7 @@ export default async function GamesPage() {
                           </p>
                         </div>
 
+                        <ScorecardButton gameId={game.id} />
                       </div>
                     </CardContent>
                   </Card>
