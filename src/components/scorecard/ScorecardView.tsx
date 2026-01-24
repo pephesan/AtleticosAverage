@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { getGameById, getGameLineup, getAtBats, getPlayers, getSubstitutions } from '@/lib/supabase-queries';
 import { LineupSelector } from './LineupSelector';
 import { ScorecardGrid } from './ScorecardGrid';
+import { SyncStatsButton } from './SyncStatsButton';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ScorecardViewProps {
@@ -83,7 +84,7 @@ export function ScorecardView({ gameId }: ScorecardViewProps) {
       <div className="container mx-auto px-4 py-6 space-y-6">
         
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <Link href={`/games`}>
               <Button variant="ghost" className="mb-2 gap-2">
@@ -106,26 +107,34 @@ export function ScorecardView({ gameId }: ScorecardViewProps) {
             </div>
           </div>
 
-          {/* Botón para crear/editar lineup */}
-          {isAuthenticated && (
-            <Button 
-              onClick={() => setShowLineupSelector(!showLineupSelector)}
-              variant="outline"
-              className="gap-2"
-            >
-              {lineup.length === 0 ? (
-                <>
-                  <Plus className="w-4 h-4" />
-                  Crear Lineup
-                </>
-              ) : (
-                <>
-                  <Users className="w-4 h-4" />
-                  Editar Lineup
-                </>
-              )}
-            </Button>
-          )}
+          {/* Botones de acción */}
+          <div className="flex gap-2 flex-wrap">
+            {/* Botón para crear/editar lineup */}
+            {isAuthenticated && (
+              <Button 
+                onClick={() => setShowLineupSelector(!showLineupSelector)}
+                variant="outline"
+                className="gap-2"
+              >
+                {lineup.length === 0 ? (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Crear Lineup
+                  </>
+                ) : (
+                  <>
+                    <Users className="w-4 h-4" />
+                    Editar Lineup
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Botón de sincronización - Solo si hay lineup y at bats */}
+            {isAuthenticated && lineup.length > 0 && atBats.length > 0 && (
+              <SyncStatsButton gameId={parseInt(gameId)} onSynced={loadData} />
+            )}
+          </div>
         </div>
 
         {/* Selector de Lineup o Grid */}

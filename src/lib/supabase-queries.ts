@@ -45,6 +45,9 @@ export async function getPlayerStats() {
   return data || [];
 }
 
+const playerStats = await getPlayerStats();
+console.log('📊 Player Stats:', playerStats);
+
 // Obtener estadísticas de un jugador específico
 export async function getPlayerStatsById(playerId: number) {
   const { data, error } = await supabase
@@ -639,6 +642,202 @@ export async function deleteSubstitution(id: number) {
 
   if (error) {
     console.error('Error deleting substitution:', error);
+    throw error;
+  }
+}
+
+
+// Calcular estadísticas de un jugador desde todos sus at_bats
+export async function calculatePlayerStatsFromScorecard(playerId: number, gameId?: number) {
+  // Si gameId está presente, solo calcular para ese juego
+  let query = supabase
+    .from('at_bats')
+    .select('*')
+    .eq('player_id', playerId);
+  
+  if (gameId) {
+    query = query.eq('game_id', gameId);
+  }
+
+  const { data: atBats, error } = await query;
+
+  if (error) {
+    console.error('Error fetching at bats for calculation:', error);
+    return null;
+  }
+
+  if (!atBats || atBats.length === 0) {
+    return null;
+  }
+
+  // Calcular estadísticas
+  const hits = atBats.filter(ab => ['1B', '2B', '3B', 'HR'].includes(ab.result_type));
+  const singles = atBats.filter(ab => ab.result_type === '1B').length;
+  const doubles = atBats.filter(ab => ab.result_type === '2B').length;
+  const triples = atBats.filter(ab => ab.result_type === '3B').length;
+  const homeRuns = atBats.filter(ab => ab.result_type === 'HR').length;
+  const strikeouts = atBats.filter(ab => ab.result_type === 'K').length;
+  const walks = atBats.filter(ab => ab.result_type === 'BB').length;
+  
+  // At bats no incluyen walks ni HBP
+  const atBatsCount = atBats.filter(ab => !['BB', 'HBP'].includes(ab.result_type)).length;
+  
+  const totalHits = hits.length;
+  const runs = atBats.reduce((sum, ab) => sum + (ab.runs_scored || 0), 0);
+  const rbis = atBats.reduce((sum, ab) => sum + (ab.rbis || 0), 0);
+  const stolenBases = atBats.filter(ab => ab.stolen_base).length;
+
+  // Calcular AVG
+  const avg = atBatsCount > 0 ? totalHits / atBatsCount : 0;
+
+  // Calcular OBP (On Base Percentage)
+  const plateAppearances = atBatsCount + walks;
+  const obp = plateAppearances > 0 ? (totalHits + walks) / plateAppearances : 0;
+
+  // Calcular SLG (Slugging)
+  const totalBases = singles + (doubles * 2) + (triples * 3) + (homeRuns * 4);
+  const slg = atBatsCount > 0 ? totalBases / atBatsCount : 0;
+
+  return {
+    player_id: playerId,
+    games_played: gameId ? 1 : [...new Set(atBats.map(ab => ab.game_id))].length,
+    at_bats: atBatsCount,
+    runs: runs,
+    hits: totalHits,
+    doubles: doubles,
+    triples: triples,
+    home_runs: homeRuns,
+    rbi: rbis,  // Usar 'rbi' (singular) para compatibilidad con la UI
+    rbis: rbis, // Mantener también 'rbis' (plural)
+    walks: walks,
+    strikeouts: strikeouts,
+    stolen_bases: stolenBases,
+    batting_average: parseFloat(avg.toFixed(3)), // Usar 'batting_average' para compatibilidad con la UI
+    avg: parseFloat(avg.toFixed(3)), // Mantener también 'avg'
+    obp: parseFloat(obp.toFixed(3)),
+    slg: parseFloat(slg.toFixed(3)),
+  };
+}
+
+// Sincronizar estadísticas de un juego completo
+export async function syncGameStatsToPlayerStats(gameId: number) {
+  try {
+    console.log('🔄 Iniciando sincronización para juego:', gameId); // ← AGREGAR
+    
+    // Obtener todos los at_bats del juego
+    const { data: atBats, error: atBatsError } = await supabase
+      .from('at_bats')
+      .select('player_id')
+      .eq('game_id', gameId);
+
+    if (atBatsError) throw atBatsError;
+
+    console.log('📊 At bats encontrados:', atBats); // ← AGREGAR
+
+    // Obtener jugadores únicos
+    const uniquePlayerIds = [...new Set(atBats?.map(ab => ab.player_id) || [])];
+    console.log('👥 Jugadores únicos:', uniquePlayerIds); // ← AGREGAR
+
+    // Para cada jugador, calcular sus stats TOTALES (no solo del juego)
+    for (const playerId of uniquePlayerIds) {
+      console.log('🔢 Calculando stats para jugador:', playerId); // ← AGREGAR
+      
+      const stats = await calculatePlayerStatsFromScorecard(playerId);
+      console.log('📈 Stats calculadas:', stats); // ← AGREGAR
+      
+      if (!stats) continue;
+
+      // Verificar si ya existe un registro de stats para este jugador
+      const { data: existingStats } = await supabase
+        .from('player_stats')
+        .select('id')
+        .eq('player_id', playerId)
+        .single();
+
+      console.log('📋 Stats existentes:', existingStats); // ← AGREGAR
+
+      if (existingStats) {
+        // Actualizar
+        console.log('✏️ Actualizando stats...'); // ← AGREGAR
+        const { data, error } = await supabase
+          .from('player_stats')
+          .update({
+            ...stats,
+            calculated_from_scorecard: true,
+            last_synced_at: new Date().toISOString(),
+          })
+          .eq('id', existingStats.id);
+        
+        console.log('✅ Update result:', { data, error }); // ← AGREGAR
+      } else {
+        // Crear nuevo
+        console.log('➕ Creando nuevo registro...'); // ← AGREGAR
+        const { data, error } = await supabase
+          .from('player_stats')
+          .insert({
+            ...stats,
+            calculated_from_scorecard: true,
+            last_synced_at: new Date().toISOString(),
+          });
+        
+        console.log('✅ Insert result:', { data, error }); // ← AGREGAR
+      }
+    }
+
+    console.log('🎉 Sincronización completada!'); // ← AGREGAR
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error syncing game stats:', error);
+    throw error;
+  }
+}
+
+// Recalcular todas las estadísticas desde todos los juegos
+export async function recalculateAllStatsFromScorecard() {
+  try {
+    // Obtener todos los jugadores que tienen at_bats
+    const { data: atBats, error } = await supabase
+      .from('at_bats')
+      .select('player_id');
+
+    if (error) throw error;
+
+    const uniquePlayerIds = [...new Set(atBats?.map(ab => ab.player_id) || [])];
+
+    for (const playerId of uniquePlayerIds) {
+      const stats = await calculatePlayerStatsFromScorecard(playerId);
+      
+      if (!stats) continue;
+
+      const { data: existingStats } = await supabase
+        .from('player_stats')
+        .select('id')
+        .eq('player_id', playerId)
+        .single();
+
+      if (existingStats) {
+        await supabase
+          .from('player_stats')
+          .update({
+            ...stats,
+            calculated_from_scorecard: true,
+            last_synced_at: new Date().toISOString(),
+          })
+          .eq('id', existingStats.id);
+      } else {
+        await supabase
+          .from('player_stats')
+          .insert({
+            ...stats,
+            calculated_from_scorecard: true,
+            last_synced_at: new Date().toISOString(),
+          });
+      }
+    }
+
+    return { success: true, playersUpdated: uniquePlayerIds.length };
+  } catch (error) {
+    console.error('Error recalculating all stats:', error);
     throw error;
   }
 }

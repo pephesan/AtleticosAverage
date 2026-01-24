@@ -1,7 +1,7 @@
 // src/components/scorecard/ScorecardGrid.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -173,9 +173,9 @@ export function ScorecardGrid({
                   const originalTotals = getPlayerTotals(item.original.player_id);
                   
                   return (
-                    <>
+                    <Fragment key={`lineup-${item.original.id}`}>
                       {/* Fila del jugador original */}
-                      <tr key={`original-${item.original.id}`} className="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                      <tr className="border-b hover:bg-slate-50 dark:hover:bg-slate-800/50">
                         {/* Jugador */}
                         <td className="sticky left-0 z-10 bg-white dark:bg-slate-900 p-3 border-r">
                           <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export function ScorecardGrid({
                           </tr>
                         );
                       })}
-                    </>
+                    </Fragment>
                   );
                 })}
 
