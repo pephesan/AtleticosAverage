@@ -70,18 +70,6 @@ export default async function PlayerDetailPage({
                   </div>
                 </div>
               </div>
-
-              {/* Edit Button */}
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 border-0 text-white"
-              >
-                <Link href={`/players/${playerId}/edit`} className="gap-2">
-                  <Edit className="w-4 h-4" />
-                  Editar Jugador
-                </Link>
-              </Button>
             </div>
           </div>
         </div>
