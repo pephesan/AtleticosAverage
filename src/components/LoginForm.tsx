@@ -24,12 +24,14 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+  
     setTimeout(() => {
       // Verificar si la contraseña está en el array (case insensitive)
-      if (VALID_PASSWORDS.includes(password.toLowerCase())) {
-        // Guardar en localStorage que está autenticado
+      const normalizedPassword = password.toLowerCase();
+      if (VALID_PASSWORDS.includes(normalizedPassword)) {
+        // Guardar en localStorage que está autenticado Y el nombre de usuario
         localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('adminUser', normalizedPassword); // ← AGREGAR ESTA LÍNEA
         
         // Redirigir a donde intentaba ir o a /admin por defecto
         const from = searchParams.get('from') || '/admin';
