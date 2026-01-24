@@ -178,17 +178,17 @@ export default async function PlayerDetailPage({
                     />
                     <StatItem 
                       label="OBP" 
-                      value={`.${(stats.on_base_percentage * 1000).toFixed(0)}`}
+                      value={`.${((stats.obp || 0) * 1000).toFixed(0)}`}
                       highlight
                     />
                     <StatItem 
                       label="SLG" 
-                      value={`.${(stats.slugging_percentage * 1000).toFixed(0)}`}
+                      value={`.${((stats.slg || 0) * 1000).toFixed(0)}`}
                       highlight
                     />
                     <StatItem 
                       label="OPS" 
-                      value={`.${((stats.on_base_percentage + stats.slugging_percentage) * 1000).toFixed(0)}`}
+                      value={`.${(((stats.obp || 0) + (stats.slg || 0)) * 1000).toFixed(0)}`}
                       highlight
                     />
                     <StatItem label="Walks" value={stats.walks} />
@@ -199,19 +199,19 @@ export default async function PlayerDetailPage({
                   <div className="pt-4 space-y-3">
                     <PerformanceBar 
                       label="Promedio de Bateo" 
-                      value={stats.batting_average} 
+                      value={stats.batting_average || 0} 
                       max={0.400}
                       color="blue"
                     />
                     <PerformanceBar 
                       label="On Base %" 
-                      value={stats.on_base_percentage} 
+                      value={stats.obp || 0} 
                       max={0.500}
                       color="green"
                     />
                     <PerformanceBar 
                       label="Slugging %" 
-                      value={stats.slugging_percentage} 
+                      value={stats.slg || 0} 
                       max={0.700}
                       color="purple"
                     />
