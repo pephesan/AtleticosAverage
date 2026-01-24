@@ -4,11 +4,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Home, Users, Calendar, TrendingUp, DollarSign, Settings, Menu, X, LogOut } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Home, Users, Calendar, TrendingUp, DollarSign, Settings, Menu, X, LogOut, User } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -22,14 +23,27 @@ const navigation = [
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
 
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-  const closeMobileMenu = () => setMobileMenuOpen(false);
+  useEffect(() => {
+    // Verificar si está autenticado
+    const auth = localStorage.getItem('isAuthenticated');
+    const user = localStorage.getItem('adminUser');
+    setIsAuthenticated(auth === 'true');
+    setUserName(user);
+  }, [pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('adminUser');
+    setIsAuthenticated(false);
+    setUserName(null);
     window.location.href = '/';
   };
+
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <nav className="border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 backdrop-blur-xl supports-[backdrop-filter]:bg-white/80 dark:bg-slate-950/80 dark:supports-[backdrop-filter]:bg-slate-950/80 sticky top-0 z-50 shadow-sm">
@@ -96,8 +110,16 @@ export function Navbar() {
               <ThemeToggle />
             </div>
 
-            {/* Logout Button - Solo visible si estás en /admin */}
-            {pathname?.startsWith('/admin') && (
+            {/* User Badge - Mostrar si está autenticado */}
+            {isAuthenticated && userName && (
+              <Badge className="ml-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 gap-1 px-3 py-1">
+                <User className="w-3 h-3" />
+                <span className="capitalize">{userName}</span>
+              </Badge>
+            )}
+
+            {/* Logout Button - Visible siempre que esté autenticado */}
+            {isAuthenticated && (
               <Button
                 onClick={handleLogout}
                 variant="ghost"
@@ -112,8 +134,17 @@ export function Navbar() {
 
           {/* Mobile menu button */}
           <div className="flex md:hidden items-center gap-2">
+            {/* User Badge Mobile */}
+            {isAuthenticated && userName && (
+              <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 gap-1 px-2 py-1 text-xs">
+                <User className="w-3 h-3" />
+                <span className="capitalize">{userName}</span>
+              </Badge>
+            )}
+            
             <ThemeToggle />
-            {pathname?.startsWith('/admin') && (
+            
+            {isAuthenticated && (
               <Button
                 onClick={handleLogout}
                 variant="ghost"
@@ -123,6 +154,7 @@ export function Navbar() {
                 <LogOut className="w-4 h-4" />
               </Button>
             )}
+            
             <button
               onClick={toggleMobileMenu}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -164,7 +196,7 @@ export function Navbar() {
               })}
 
               {/* Logout Button Mobile */}
-              {pathname?.startsWith('/admin') && (
+              {isAuthenticated && (
                 <Button
                   onClick={handleLogout}
                   variant="ghost"
