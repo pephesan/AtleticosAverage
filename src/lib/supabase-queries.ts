@@ -588,3 +588,57 @@ export async function updateAtBat(id: number, updates: {
   }
   return data;
 }
+
+// Obtener sustituciones de un juego
+export async function getSubstitutions(gameId: number) {
+  const { data, error } = await supabase
+    .from('player_substitutions')
+    .select(`
+      *,
+      player_out:player_out_id(id, name, number),
+      player_in:player_in_id(id, name, number)
+    `)
+    .eq('game_id', gameId)
+    .order('inning', { ascending: true });
+
+  if (error) {
+    console.error('Error fetching substitutions:', error);
+    return [];
+  }
+  return data;
+}
+
+// Registrar una sustitución
+export async function addSubstitution(substitution: {
+  game_id: number;
+  inning: number;
+  player_out_id: number;
+  player_in_id: number;
+  batting_order: number;
+  position: string;
+}) {
+  const { data, error } = await supabase
+    .from('player_substitutions')
+    .insert(substitution)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error adding substitution:', error);
+    throw error;
+  }
+  return data;
+}
+
+// Eliminar una sustitución
+export async function deleteSubstitution(id: number) {
+  const { error } = await supabase
+    .from('player_substitutions')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting substitution:', error);
+    throw error;
+  }
+}
