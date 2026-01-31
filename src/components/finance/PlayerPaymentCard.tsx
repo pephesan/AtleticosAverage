@@ -20,7 +20,6 @@ interface PlayerPaymentCardProps {
   conceptId: number;
   conceptName: string;
   amountPerPlayer: number;
-  formatDate: (date: string) => string;
   isActive: boolean;
 }
 
@@ -29,12 +28,19 @@ export function PlayerPaymentCard({
   conceptId, 
   conceptName,
   amountPerPlayer,
-  formatDate,
   isActive 
 }: PlayerPaymentCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { player, payments, totalPaid, amountDue, status } = playerPayment;
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+  
   const statusConfig = {
     complete: {
       bg: 'bg-green-50 dark:bg-green-950/20',
