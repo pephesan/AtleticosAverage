@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp, Plus } from 'lucide-react';
 import Link from 'next/link';
-import { DeletePaymentButton } from '@/components/finance/DeletePaymentButton';
+import { DeletePaymentButton } from './DeletePaymentButton';
 
 interface PlayerPaymentCardProps {
   playerPayment: {
@@ -20,6 +20,7 @@ interface PlayerPaymentCardProps {
   conceptId: number;
   conceptName: string;
   amountPerPlayer: number;
+  formatDate: (date: string) => string;
   isActive: boolean;
 }
 
@@ -28,19 +29,11 @@ export function PlayerPaymentCard({
   conceptId, 
   conceptName,
   amountPerPlayer,
+  formatDate,
   isActive 
 }: PlayerPaymentCardProps) {
   const [expanded, setExpanded] = useState(false);
   const { player, payments, totalPaid, amountDue, status } = playerPayment;
-
-  // ← MOVER formatDate AQUÍ
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-MX', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   const statusConfig = {
     complete: {
