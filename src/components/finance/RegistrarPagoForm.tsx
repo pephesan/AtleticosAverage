@@ -19,12 +19,13 @@ export function RegistrarPagoForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const conceptoId = searchParams.get('concepto');
+  const jugadorId = searchParams.get('jugador');
 
   const [loading, setLoading] = useState(false);
   const [players, setPlayers] = useState<any[]>([]);
   const [concepts, setConcepts] = useState<any[]>([]);
   const [formData, setFormData] = useState({
-    player_id: '',
+    player_id: jugadorId || '',
     concept_id: conceptoId || '',
     amount_paid: '',
     payment_date: new Date().toISOString().split('T')[0],
