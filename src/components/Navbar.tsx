@@ -10,6 +10,7 @@ import { ThemeToggle } from './ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Home, Users, Calendar, TrendingUp, DollarSign, Settings, Menu, X, LogOut, User } from 'lucide-react';
+import * as gtag from '@/lib/gtag';
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -35,6 +36,13 @@ export function Navbar() {
   }, [pathname]);
 
   const handleLogout = () => {
+    // Track logout event
+    gtag.event({
+      action: 'logout',
+      category: 'user_interaction',
+      label: 'User Logout',
+    });
+  
     localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('adminUser');
     setIsAuthenticated(false);
@@ -42,7 +50,15 @@ export function Navbar() {
     window.location.href = '/';
   };
 
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const toggleMobileMenu = () => {
+    const willOpen = !mobileMenuOpen;
+    gtag.event({
+      action: 'mobile_menu_toggle',
+      category: 'navigation',
+      label: willOpen ? 'Open Menu' : 'Close Menu',
+    });
+    setMobileMenuOpen(willOpen);
+  };
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
@@ -81,10 +97,17 @@ export function Navbar() {
               
               return (
                 <Link
-                  key={item.name}
-                  href={item.href}
-                  className="relative group"
-                >
+                    key={item.name}
+                    href={item.href}
+                    className="relative group"
+                    onClick={() => {
+                      gtag.event({
+                        action: 'nav_click',
+                        category: 'navigation',
+                        label: `Desktop Nav - ${item.name}`,
+                      });
+                    }}
+                  >
                   <div
                     className={cn(
                       'flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all duration-300',
